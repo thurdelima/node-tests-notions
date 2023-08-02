@@ -5,7 +5,7 @@ export type stringInfo = {
     upperCase: string,
     characters: string[],
     length: number,
-    extraInfo: Object 
+    extraInfo: Object
 }
 
 type LoggerServiceCallBack = (arg: string) => void;
@@ -17,11 +17,30 @@ export function calculateComplexity(stringInfo: stringInfo) {
 
 
 export function toUpperCaseWithCb(arg: string, callBack: LoggerServiceCallBack) {
-    
-    if(!arg) {
+
+    if (!arg) {
         callBack('Invalid argument!');
         return;
     }
     callBack(`called function with ${arg}`)
     return arg.toLocaleUpperCase();
+}
+
+
+
+export class OtherStringUtils {
+
+    public callExternalService() {
+        console.log('Calling external service!!!');
+    }
+
+    public toUpperCase(arg: string) {
+        return arg.toUpperCase()
+    }
+
+    public logString(arg: string) {
+        console.log(arg);
+    }
+
+
 }
