@@ -88,7 +88,65 @@ describe('ReservationsHandler test suite', () => {
             expect(responseMock.write).toBeCalledWith(JSON.stringify({ reservationId: someReservationId }))
         })
 
+        it('should not create reservation from invalid request', async () => {
+            getRequestBodyMock.mockResolvedValueOnce({});
 
+            await sut.handleRequest();
+
+            expect(responseMock.statusCode).toBe(HTTP_CODES.BAD_REQUEST);
+            expect(responseMock.write).toBeCalledWith(JSON.stringify('Incomplete reservation!'));
+        })
+
+        it('should not create reservation from invalid fields in request', async() => {
+            const moreThanAReservation = {...someReservation, someField: '123'};
+            getRequestBodyMock.mockResolvedValueOnce(moreThanAReservation);
+
+            await sut.handleRequest();
+
+            expect(responseMock.statusCode).toBe(HTTP_CODES.BAD_REQUEST);
+            expect(responseMock.write).toBeCalledWith(JSON.stringify('Incomplete reservation!'))
+        })
+
+
+    })
+
+    describe('GET requests', () => {
+        beforeEach(() => {
+            request.method = HTTP_METHODS.GET;
+        })
+
+        it('should return all reservations for /all request', async () => {
+            request.url = '/reservations/all';
+            reservationsDataAccessMock.getAllReservations.mockResolvedValueOnce([someReservation]);
+
+            await sut.handleRequest();
+
+            expect(responseMock.writeHead).toBeCalledWith(HTTP_CODES.OK,  { 'Content-Type': 'application/json' });
+            expect(responseMock.write).toBeCalledWith(JSON.stringify([someReservation]));
+
+        })
+
+        it('should return reservation for existing id', async () => {
+            request.url = `/reservations/${someReservationId}`;
+            reservationsDataAccessMock.getReservation.mockResolvedValueOnce(someReservation);
+
+            await sut.handleRequest();
+
+            expect(responseMock.writeHead).toBeCalledWith(HTTP_CODES.OK, { 'Content-Type': 'application/json' });
+            expect(responseMock.write).toBeCalledWith(JSON.stringify(someReservation));
+        })
+
+        it('should return not found for non existing id', async () => {
+            request.url = `/reservations/${someReservationId}`;
+            reservationsDataAccessMock.getReservation.mockResolvedValueOnce(undefined);
+
+            await sut.handleRequest();
+
+            expect(responseMock.statusCode).toBe(HTTP_CODES.NOT_fOUND)
+            expect(responseMock.write).toBeCalledWith(JSON.stringify(
+                `Reservation with id ${someReservationId} not found`
+            ));
+        })
     })
 
 
