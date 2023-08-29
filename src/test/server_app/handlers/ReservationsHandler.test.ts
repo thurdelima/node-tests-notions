@@ -97,8 +97,8 @@ describe('ReservationsHandler test suite', () => {
             expect(responseMock.write).toBeCalledWith(JSON.stringify('Incomplete reservation!'));
         })
 
-        it('should not create reservation from invalid fields in request', async() => {
-            const moreThanAReservation = {...someReservation, someField: '123'};
+        it('should not create reservation from invalid fields in request', async () => {
+            const moreThanAReservation = { ...someReservation, someField: '123' };
             getRequestBodyMock.mockResolvedValueOnce(moreThanAReservation);
 
             await sut.handleRequest();
@@ -121,7 +121,7 @@ describe('ReservationsHandler test suite', () => {
 
             await sut.handleRequest();
 
-            expect(responseMock.writeHead).toBeCalledWith(HTTP_CODES.OK,  { 'Content-Type': 'application/json' });
+            expect(responseMock.writeHead).toBeCalledWith(HTTP_CODES.OK, { 'Content-Type': 'application/json' });
             expect(responseMock.write).toBeCalledWith(JSON.stringify([someReservation]));
 
         })
@@ -247,6 +247,71 @@ describe('ReservationsHandler test suite', () => {
                 `Updated ${Object.keys(updateObject)} of reservation ${someReservationId}`
             ));
         })
+    })
+
+    describe('DELETE requests', () => {
+
+        beforeEach(() => {
+            request.method = HTTP_METHODS.DELETE;
+        });
+
+        it('should delete reservation with provided id', async () => {
+            request.url = `/reservations/${someReservationId}`;
+
+            await sut.handleRequest();
+
+            expect(responseMock.statusCode).toBe(HTTP_CODES.OK)
+            expect(responseMock.write).toBeCalledWith(JSON.stringify(
+                `Deleted reservation with id ${someReservationId}`
+            ));
+        })
+
+        it('should return bad request if no id provided', async () => {
+            request.url = `/reservations`;
+
+            await sut.handleRequest();
+
+            expect(responseMock.statusCode).toBe(HTTP_CODES.BAD_REQUEST);
+            expect(responseMock.write).toBeCalledWith(JSON.stringify(
+                'Please provide an ID!'
+            ));
+        })
+
+        it('should return nothing for not authorized requests', async () => {
+            request.headers.authorization = '1234';
+            authorizerMock.validateToken.mockReset();
+            authorizerMock.validateToken.mockResolvedValueOnce(false);
+
+            await sut.handleRequest();
+
+            expect(responseMock.statusCode).toBe(HTTP_CODES.UNAUTHORIZED);
+            expect(responseMock.write).toBeCalledWith(JSON.stringify(
+                'Unauthorized operation!'
+            ));
+
+        })
+
+
+        it('should return nothing if no authorization header is present', async () => {
+            request.headers.authorization = undefined;
+
+            await sut.handleRequest();
+
+            expect(responseMock.statusCode).toBe(HTTP_CODES.UNAUTHORIZED)
+            expect(responseMock.write).toBeCalledWith(JSON.stringify(
+                'Unauthorized operation!'
+            ));
+        });
+
+        it('should do nothing for not supported http methods', async () => {
+            request.method = 'SOME-METHOD'
+    
+            await sut.handleRequest();
+    
+            expect(responseMock.write).not.toBeCalled();
+            expect(responseMock.writeHead).not.toBeCalled();
+        });
+
     })
 
 
