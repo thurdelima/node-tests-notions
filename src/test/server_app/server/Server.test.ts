@@ -1,10 +1,8 @@
 import { Authorizer } from "../../../app/server_app/auth/Authorizer";
 import { ReservationsDataAccess } from "../../../app/server_app/data/ReservationsDataAccess";
-import { LoginHandler } from "../../../app/server_app/handlers/LoginHandler";
-import { RegisterHandler } from "../../../app/server_app/handlers/RegisterHandler";
-import { ReservationsHandler } from "../../../app/server_app/handlers/ReservationsHandler";
+
 import { Server } from "../../../app/server_app/server/Server"
-import { createServer } from 'http';
+
 
 
 jest.mock('../../../app/server_app/data/ReservationsDataAccess')
@@ -51,9 +49,21 @@ describe('Server test suite', () => {
         jest.clearAllMocks();
     })
 
-    it('should work by now', () => {
-        sut.startServer();
+    it('should start server on port 8080 and call method end of the request', async () => {
+        
+        //aways verify if the method needs await/async, calls methods async/await without async/await, can throw some async errors
+        await sut.startServer();
+
+
+        expect(serverMock.listen).toBeCalledWith(8080);
+
+        expect(responseMock.end).toBeCalled();
     })
 
 
-})
+
+
+  
+
+
+})  
