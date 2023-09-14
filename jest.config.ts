@@ -2,8 +2,8 @@ import type { Config} from '@jest/types';
 
 
 //change dir for pass_checker, doubles, to test
-const baseDir = '<rootDir>/src/app/server_app/server';
-const baseTestDir = '<rootDir>/src/test/server_app/server';
+const baseDir = '<rootDir>/src/app/server_app/auth';
+const baseTestDir = '<rootDir>/src/test/server_app/auth';
 
 const config: Config.InitialOptions = {
     preset: 'ts-jest',
