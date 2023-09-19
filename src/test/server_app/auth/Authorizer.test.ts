@@ -79,4 +79,30 @@ describe('Authorizer test suite', () => {
         })
 
     });
+
+    it('should return tokenId for valid credentials', async () => {
+
+        getUserByUserNameMock.mockResolvedValueOnce({
+            password: somePassword
+        })
+
+        generateTokenMock.mockResolvedValueOnce(someId);
+
+        const actual = await sut.login(someUserName, somePassword);
+
+        expect(actual).toBe(someId);
+    });
+
+    it('should return undefined for invalid credentials', async () => {
+
+        getUserByUserNameMock.mockResolvedValueOnce({
+            password: somePassword
+        })
+
+        generateTokenMock.mockResolvedValueOnce(someId);
+
+        const actual = await sut.login(someUserName, 'someOtherPassword');
+
+        expect(actual).toBeUndefined();
+    })
 })
