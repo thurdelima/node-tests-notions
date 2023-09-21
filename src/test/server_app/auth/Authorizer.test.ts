@@ -104,5 +104,12 @@ describe('Authorizer test suite', () => {
         const actual = await sut.login(someUserName, 'someOtherPassword');
 
         expect(actual).toBeUndefined();
+    });
+
+    it('should invalidate token on logout call', async () => {
+
+        await sut.logout(someId);
+
+        expect(invalidateTokenMock).toBeCalledWith(someId);
     })
 })
