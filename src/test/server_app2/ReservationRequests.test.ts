@@ -3,6 +3,7 @@ import { ResponseTestWrapper } from './test_utils/ResponseTestWrapper';
 import { HTTP_CODES, HTTP_METHODS } from "../../app/server_app/model/ServerModel";
 import { Reservation } from '../../app/server_app/model/ReservationModel';
 import { DataBase } from '../../app/server_app/data/DataBase';
+import { Server } from '../../app/server_app/server/Server';
 
 
 jest.mock('../../app/server_app/data/DataBase');
@@ -47,10 +48,57 @@ describe('Reservation requests test suite', () => {
     const deleteSpy = jest.spyOn(DataBase.prototype, 'delete');
 
 
+
+    beforeEach(() => {
+        requestWrapper.headers['user-agent'] = 'jest tests'
+        requestWrapper.headers['authorization'] = 'someToken'
+        // authenticate calls:
+
+        getBySpy.mockResolvedValueOnce({
+            valid: true
+        })
+    })
+
+
     afterEach(() => {
         requestWrapper.clearFields();
         responseWrapper.clearFields();
         jest.clearAllMocks();
+    })
+
+    describe('POST requests', () => {
+
+        it('should create reservation from valid request', async () => {
+            requestWrapper.method = HTTP_METHODS.POST;
+            requestWrapper.body = someReservation;
+            requestWrapper.url = 'localhost:8080/reservation';
+            insertSpy.mockResolvedValueOnce(someId);
+
+            await new Server().startServer();
+
+            await new Promise(process.nextTick); // this solves timing issues, 
+
+            expect(responseWrapper.statusCode).toBe(HTTP_CODES.CREATED);
+            expect(responseWrapper.body).toEqual({
+                reservationId: someId
+            })
+
+            expect(responseWrapper.headers).toContainEqual(jsonHeader);
+        })
+
+
+        it('should not create reservation from invalid request', async () => {
+            requestWrapper.method = HTTP_METHODS.POST;
+            requestWrapper.body = {};
+            requestWrapper.url = 'localhost:8080/reservation';
+
+            await new Server().startServer();
+
+            await new Promise(process.nextTick); // this solves timing issues, 
+
+            expect(responseWrapper.statusCode).toBe(HTTP_CODES.BAD_REQUEST);
+            expect(responseWrapper.body).toEqual('Incomplete reservation!')
+        });
     })
 
 })
