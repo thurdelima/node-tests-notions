@@ -101,4 +101,40 @@ describe('Reservation requests test suite', () => {
         });
     })
 
+
+    describe('GET requests', () => {
+
+        it('should return all reservations', async () => {
+
+            requestWrapper.method = HTTP_METHODS.GET;
+            requestWrapper.url = 'localhost:8080/reservation/all';
+            getAllElementSpy.mockResolvedValueOnce([someReservation, someReservation]);
+
+            await new Server().startServer();
+
+            await new Promise(process.nextTick);  // this solves timing issues
+
+            expect(responseWrapper.statusCode).toBe(HTTP_CODES.OK);
+            expect(responseWrapper.body).toEqual([someReservation, someReservation]);
+            expect(responseWrapper.headers).toContainEqual(jsonHeader);
+
+        })
+
+        it('should return specific reservations', async () => {
+            requestWrapper.method = HTTP_METHODS.GET;
+            requestWrapper.url = `localhost:8080/reservation/${someId}`;
+            getBySpy.mockResolvedValueOnce(someReservation);
+
+            await new Server().startServer();
+
+            await new Promise(process.nextTick);  // this solves timing issues
+
+            expect(responseWrapper.statusCode).toBe(HTTP_CODES.OK);
+            expect(responseWrapper.body).toEqual(someReservation);
+            expect(responseWrapper.headers).toContainEqual(jsonHeader);
+        })
+
+
+    })
+
 })
