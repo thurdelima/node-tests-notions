@@ -134,6 +134,34 @@ describe('Reservation requests test suite', () => {
             expect(responseWrapper.headers).toContainEqual(jsonHeader);
         })
 
+        it('should return not found if reservation is not found', async () => {
+            requestWrapper.method = HTTP_METHODS.GET;
+            requestWrapper.url = `localhost:8080/reservation/${someId}`;
+            getBySpy.mockResolvedValueOnce(undefined);
+
+
+            await new Server().startServer();
+
+            await new Promise(process.nextTick);  // this solves timing issues
+
+            expect(responseWrapper.statusCode).toBe(HTTP_CODES.NOT_fOUND);
+            expect(responseWrapper.body).toEqual(`Reservation with id ${someId} not found`)
+
+        })
+
+        it('should return bad request if reservation if not provided', async () => {
+
+            requestWrapper.method = HTTP_METHODS.GET;
+            requestWrapper.url = 'localhost:8080/reservation';
+
+            await new Server().startServer();
+
+            await new Promise(process.nextTick); // this solves timing issues,
+
+            expect(responseWrapper.statusCode).toBe(HTTP_CODES.BAD_REQUEST);
+            expect(responseWrapper.body).toEqual('Please provide an ID!');
+        })
+
 
     })
 
