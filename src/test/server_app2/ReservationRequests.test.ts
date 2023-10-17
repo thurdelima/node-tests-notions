@@ -165,4 +165,36 @@ describe('Reservation requests test suite', () => {
 
     })
 
+    describe('PUT requests', () => {
+
+        it('should update reservation if found and valid request', async () => {
+
+            requestWrapper.method = HTTP_METHODS.PUT;
+            requestWrapper.url = `localhost:8080/reservation/${someId}`;
+            getBySpy.mockResolvedValueOnce(someReservation);
+            updateSpy.mockResolvedValue(undefined);
+
+            requestWrapper.body = {
+                user: 'someOtherUser',
+                startDate: 'someOtherStartDate'
+            }
+
+            await new Server().startServer();
+
+            await new Promise(process.nextTick); // this solves timing issues,
+
+            
+            expect(responseWrapper.statusCode).toBe(HTTP_CODES.OK);
+            expect(responseWrapper.body).toEqual(
+                `Updated user,startDate of reservation ${someId}`
+            )
+            expect(responseWrapper.headers).toContainEqual(jsonHeader);
+
+
+        })
+    })
+
+
+
+
 })
