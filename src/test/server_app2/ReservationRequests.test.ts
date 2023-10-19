@@ -192,6 +192,29 @@ describe('Reservation requests test suite', () => {
 
 
         })
+
+        it('should not update reservation if invalid fields are provided', async () => {
+            requestWrapper.method = HTTP_METHODS.PUT;
+            requestWrapper.url = `localhost:8080/reservation/${someId}`;
+            getBySpy.mockResolvedValueOnce(someReservation);
+            updateSpy.mockResolvedValue(undefined)
+
+            requestWrapper.body = {
+                user: 'someOtherUser',
+                startDate: 'someOtherStartDate',
+                someOtherField: 'someOtherField'
+            }
+
+
+            await new Server().startServer();
+
+            await new Promise(process.nextTick); // this solves timing issues, 
+
+            expect(responseWrapper.statusCode).toBe(HTTP_CODES.BAD_REQUEST);
+            expect(responseWrapper.body).toEqual('Please provide valid fields to update!')
+
+
+        })
     })
 
 
