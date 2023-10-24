@@ -243,6 +243,38 @@ describe('Reservation requests test suite', () => {
         })
     })
 
+    describe('DELETE requests', () => {
+
+        it('should delete specific revervations', async () => {
+            requestWrapper.method = HTTP_METHODS.DELETE;
+            requestWrapper.url = `localhost:8080/reservation/${someId}`;
+            deleteSpy.mockResolvedValueOnce(undefined);
+
+            await new Server().startServer();
+
+            await new Promise(process.nextTick); // this solves timing issues,
+
+            expect(responseWrapper.statusCode).toBe(HTTP_CODES.OK);
+            expect(responseWrapper.body).toEqual(`Deleted reservation with id ${someId}`)
+
+        })
+
+        it('should return bad request if no reservation if is provided', async () => {
+
+            requestWrapper.method = HTTP_METHODS.DELETE;
+            requestWrapper.url = `localhost:8080/reservation`;
+
+            await new Server().startServer();
+
+            await new Promise(process.nextTick); // this solves timing issues, 
+
+            expect(responseWrapper.statusCode).toBe(HTTP_CODES.BAD_REQUEST);
+            expect(responseWrapper.body).toEqual('Please provide an ID!')
+        })
+
+
+    })
+
 
 
 
