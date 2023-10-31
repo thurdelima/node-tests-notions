@@ -14,8 +14,8 @@ const requestWrapper = new RequestTestWrapper();
 const responseWrapper = new ResponseTestWrapper();
 
 const fakeServer = {
-    listen: () => {},
-    close: () => {}
+    listen: () => { },
+    close: () => { }
 }
 
 jest.mock('http', () => ({
@@ -35,7 +35,7 @@ const someReservation: Reservation = {
 
 const someId = 'someId';
 
-const jsonHeader = { 'Content-Type': 'application/json'}
+const jsonHeader = { 'Content-Type': 'application/json' }
 
 
 
@@ -183,7 +183,7 @@ describe('Reservation requests test suite', () => {
 
             await new Promise(process.nextTick); // this solves timing issues,
 
-            
+
             expect(responseWrapper.statusCode).toBe(HTTP_CODES.OK);
             expect(responseWrapper.body).toEqual(
                 `Updated user,startDate of reservation ${someId}`
@@ -259,7 +259,7 @@ describe('Reservation requests test suite', () => {
 
         })
 
-        it('should return bad request if no reservation if is provided', async () => {
+        it('should return bad request if no reservation id is provided', async () => {
 
             requestWrapper.method = HTTP_METHODS.DELETE;
             requestWrapper.url = `localhost:8080/reservation`;
@@ -271,6 +271,42 @@ describe('Reservation requests test suite', () => {
             expect(responseWrapper.statusCode).toBe(HTTP_CODES.BAD_REQUEST);
             expect(responseWrapper.body).toEqual('Please provide an ID!')
         })
+
+        it('should do nothing for not supported methods', async () => {
+
+            requestWrapper.method = HTTP_METHODS.OPTIONS;
+            requestWrapper.body = {};
+            requestWrapper.url = 'localhost:8080/reservation';
+
+            await new Server().startServer();
+
+            await new Promise(process.nextTick); // this solves timing issues,
+
+            expect(responseWrapper.statusCode).toBeUndefined();
+            expect(responseWrapper.headers).toHaveLength(0);
+            expect(responseWrapper.body).toBeUndefined();
+
+
+        })
+
+
+        it('should return not authorized if request is not authorized', async () => {
+            requestWrapper.method = HTTP_METHODS.POST;
+            requestWrapper.body = {};
+            requestWrapper.url = 'localhost:8080/reservation';
+            getBySpy.mockReset();
+            getBySpy.mockResolvedValueOnce(undefined);
+
+            await new Server().startServer();
+
+            await new Promise(process.nextTick); // this solves timing issues, 
+
+
+            expect(responseWrapper.statusCode).toBe(HTTP_CODES.UNAUTHORIZED);
+            expect(responseWrapper.body).toEqual('Unauthorized operation!');
+        })
+
+
 
 
     })
