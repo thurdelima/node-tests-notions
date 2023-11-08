@@ -175,5 +175,64 @@ describe('Server app integration tests', () => {
 
     })
 
+    it('should update reservation if authorized', async () => {
+        const updateResult = await fetch(`http://localhost:8080/reservation/${createReservationId}`, {
+            method: HTTP_METHODS.PUT,
+            body: JSON.stringify({
+                startDate: 'otherStartDate'
+            }),
+            headers: {
+                authorization: token
+            }
+
+        });
+
+       
+
+        expect(updateResult.status).toBe(HTTP_CODES.OK);
+
+        const getResult = await fetch(`http://localhost:8080/reservation/${createReservationId}`, {
+            method: HTTP_METHODS.GET,
+            headers: {
+                authorization: token
+            }
+
+        });
+
+        const getRequestBody: Reservation = await getResult.json();
+        expect(getRequestBody.startDate).toBe('otherStartDate');
+        
+
+
+    })
+
+    it('should delete reservation if authorized', async () => {
+        const deleteResult = await fetch(`http://localhost:8080/reservation/${createReservationId}`, {
+            method: HTTP_METHODS.DELETE,
+            headers: {
+                authorization: token
+            }
+
+        });
+
+       
+
+        expect(deleteResult.status).toBe(HTTP_CODES.OK);
+
+        const getResult = await fetch(`http://localhost:8080/reservation/${createReservationId}`, {
+            method: HTTP_METHODS.GET,
+            headers: {
+                authorization: token
+            }
+
+        });
+
+        
+        expect(getResult.status).toBe(HTTP_CODES.NOT_fOUND);
+        
+
+
+    })
+
 
 })
